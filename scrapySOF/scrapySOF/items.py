@@ -65,7 +65,7 @@ class ScrapysofItem(scrapy.Item):
                 item['answer'] = itemAnswer
                 item['answer_stars'] = itemStar
                 item['code'] = itemCode
-                print itemCode
+                #print itemCode
                 
                 return item
             else:
