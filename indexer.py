@@ -33,9 +33,14 @@ class Indexer(object):
 	def process_all_documents(self):
 		manager = documentManager()
 		collection = manager.connect_mongo()
-		for loop in range(1, 1):
-			text = collection.find_one({"DocID": loop})["content"]
-			self.count_words(text, loop)
+		for loop in collection.find({}):
+			question = loop["question"]
+			answer = loop["answer"]
+			_id = loop["_id"]
+			print _id
+			#print _id.str
+			# code = loop["code"]
+			self.count_words(answer, _id)
 
 	# 对统计结果 <word, DocID, Freq> 排序
 	def sort_index(self):

@@ -93,7 +93,7 @@ patternReplace = re.compile('<span>|</span>|<br>|<br/>')
 pattern = re.compile(
     '<div class="author clearfix">.*?href.*?<img src.*?title=.*?<h2>(.*?)</h2>.*?<div class="content">(.*?)</div>.*?<i class="number">(.*?)</i>', re.S)
 
-page = mySrapyTest.getStackHeader(htmlS, headers)
+#page = mySrapyTest.getStackHeader(htmlS, headers)
 
 #cookie.save(ignore_discard=True, ignore_expires=True)
 # for item in items:

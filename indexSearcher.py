@@ -4,6 +4,7 @@
 import pickle
 import math
 from documentManager import documentManager
+from bson.objectid import ObjectId
 
 class indexSearcher(object):
 	
@@ -41,8 +42,13 @@ class indexSearcher(object):
 	def DocID2Doc(self, DocID):
 		manager = documentManager()
 		collection = manager.connect_mongo()
-		url = collection.find_one({"DocID": DocID})["url"]
-		return url
+		result = collection.find_one({"_id": ObjectId(DocID)})
+		url = result["url"]
+		code = result["code"]
+		re = {}
+		re["url"] = url
+		re["code"] = code
+		return re
 
 	# 计算 BM25，设定　ｃ(w,q) 为　１，即查询中每个词出现一次
 	def caculate_BM25(self, query_words):
@@ -68,7 +74,7 @@ class indexSearcher(object):
 		for id in DocId_of_query_words:
 			BM25_score = 0
 			for word in query_words.split(' '):
-				content = collection.find_one({"DocID": int(id)})["content"]
+				content = collection.find_one({"_id": ObjectId(id)})["answer"]
 				freq = self.get_wordcount_in_document(word ,content)
 				
 				doc_len = len(self.word_dictionary[word])
@@ -82,7 +88,7 @@ class indexSearcher(object):
 		score = sorted(score_dictionary.iteritems(), key=lambda d:d[1], reverse = True)
 
 		for i in score:
-			print self.DocID2Doc(int(i[0]))
+			print self.DocID2Doc(i[0])
 
 
 	def retrive_word(self, word):
@@ -92,8 +98,8 @@ class indexSearcher(object):
 
 		id_list = []
 		for word in self.word_dictionary[word]:
-			url = collection.find_one({"DocID": int(word[0])})["url"]
-			id_list.append(int(word[0]))
+			url = collection.find_one({"_id": ObjectId(word[0])})["url"]
+			id_list.append(word[0])
 		return id_list
 
 	def perform_query(self, query_input):
@@ -117,4 +123,4 @@ class indexSearcher(object):
 if __name__ == '__main__':
 	searcher = indexSearcher()
 	# print searcher.perform_query("literature science")
-	searcher.caculate_BM25("preparedstatement")
+	searcher.caculate_BM25("Genson")

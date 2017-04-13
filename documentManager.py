@@ -135,12 +135,12 @@ class documentManager(object):
 		# 		break
 
 if __name__ == '__main__':
-	seed_url = 'https://en.wikipedia.org/wiki/Main_Page'
+	#seed_url = 'https://en.wikipedia.org/wiki/Main_Page'
 	manager = documentManager()
 	manager.connect_mongo()
 	#manager.collect_seeds(seed_url)
 	# manager.collect_content()
 
-	htmlS = "http://stackoverflow.com/questions/3271249/difference-between-statement-and-preparedstatement" #test!
-	manager.collect_seeds_sof(htmlS)
-	manager.collect_content_sof_test()
+	# htmlS = "http://stackoverflow.com/questions/3271249/difference-between-statement-and-preparedstatement" #test!
+	# manager.collect_seeds_sof(htmlS)
+	# manager.collect_content_sof_test()
