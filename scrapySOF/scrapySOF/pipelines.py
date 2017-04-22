@@ -13,7 +13,7 @@ class ScrapysofPipeline(object):
     def __init__(self):
 		connection = MongoClient(settings['MONGO_HOST'], settings['MONGO_PORT'])
 		db = connection[settings['MONGO_DB_NAME']]
-		self.collection = db[settings['MONGO_DB_TABLE']]
+		self.collection = db[settings['MONGO_DB_TABLE']+settings['LIB_NAME']]
         
     def process_item(self, item, spider):
         valid = True
