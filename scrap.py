@@ -76,22 +76,22 @@ class scrapy_test(object):
             print "not found"
 
 
-cookie = cookielib.CookieJar()
-handler = urllib2.HTTPCookieProcessor(cookie)
-opener = urllib2.build_opener(handler)
-values = {"username": "00000", "password": "123456"}
-data = urllib.urlencode(values)
-htmlTemp = "http://admin.qiancs.cn/admin/login.php"
-htmlBaike = 'http://www.qiushibaike.com/hot/page/1'
-htmlS = "http://stackoverflow.com/questions/5042886/resteasy-or-jersey"
-headers = {'User-Agent': 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
+# cookie = cookielib.CookieJar()
+# handler = urllib2.HTTPCookieProcessor(cookie)
+# opener = urllib2.build_opener(handler)
+# values = {"username": "00000", "password": "123456"}
+# data = urllib.urlencode(values)
+# htmlTemp = "http://admin.qiancs.cn/admin/login.php"
+# htmlBaike = 'http://www.qiushibaike.com/hot/page/1'
+# htmlS = "http://stackoverflow.com/questions/5042886/resteasy-or-jersey"
+# headers = {'User-Agent': 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
 
-response = opener.open("https://baidu.com")
-mySrapyTest = scrapy_test()
-html = mySrapyTest.getHtmlNoData(htmlS, headers).decode('utf-8')
-patternReplace = re.compile('<span>|</span>|<br>|<br/>')
-pattern = re.compile(
-    '<div class="author clearfix">.*?href.*?<img src.*?title=.*?<h2>(.*?)</h2>.*?<div class="content">(.*?)</div>.*?<i class="number">(.*?)</i>', re.S)
+# response = opener.open("https://baidu.com")
+# mySrapyTest = scrapy_test()
+# html = mySrapyTest.getHtmlNoData(htmlS, headers).decode('utf-8')
+# patternReplace = re.compile('<span>|</span>|<br>|<br/>')
+# pattern = re.compile(
+#     '<div class="author clearfix">.*?href.*?<img src.*?title=.*?<h2>(.*?)</h2>.*?<div class="content">(.*?)</div>.*?<i class="number">(.*?)</i>', re.S)
 
 #page = mySrapyTest.getStackHeader(htmlS, headers)
 

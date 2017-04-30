@@ -8,6 +8,7 @@ import pickle
 import re
 import sys
 from scrap import scrapy_test
+from settings import *
 
 reload(sys)
 sys.setdefaultencoding("utf8")
@@ -19,11 +20,16 @@ class documentManager(object):
 		self.seeds_visited = set([])
 
 	def connect_mongo(self):
-		client = MongoClient("120.27.120.60",27017)
-		db = client.data_db
+		client = MongoClient(MONGO_HOST,MONGO_PORT)
+		db = client[MONGO_DB_NAME]
 		collection = db.sof_data_collection
 		return collection
 
+	def connect_analyze(self):
+		client = MongoClient(MONGO_HOST,MONGO_PORT)
+		db = client[MONGO_DB_NAME]
+		collection = db[MONGO_DB_TABLE_ANALYZE+LIB_NAME]
+		return collection
 		# mydict = {"name":"Lucy", "sex":"female","job":"nurse"}
 		# collection.insert(mydict)
 		# for i in collection.find():
