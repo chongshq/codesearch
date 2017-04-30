@@ -80,9 +80,10 @@ class Processor(object):
         #     print "doc in corpus tfidf:=====>",doc
         print "==== tfidf model complete ===="
         return corpus_tfidf
-    def process_input(self, input):  # 映射到词袋
-        query_bow = self.dictionary.doc2bow(input.lower().split())
-        print query_bow
+    
+    def process_input(self, dictionary, input):  # 映射到词袋
+        query_bow = dictionary.doc2bow(input.lower().split())
+        # print query_bow
         return query_bow
 
 if __name__ == '__main__':

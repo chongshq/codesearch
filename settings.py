@@ -6,4 +6,4 @@ MONGO_DB_NAME = 'data_db'
 MONGO_DB_TABLE = 'sof_data_collection_'
 MONGO_DB_TABLE_ANALYZE = 'sof_data_analyzed_'
 
-LIB_NAME = 'test'
+LIB_NAME = 'jersey'

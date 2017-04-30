@@ -117,33 +117,46 @@ class TopicModel(object):
         
 
     def train(self, processor, env):    # 训练主题模型
-        if env == 1:
-            self.process_all_documents()
+        
+        filename = LIB_NAME+'.pkl'
+        if os.path.exists(filename):
+            print "model already exists"
+            self.load_data()
         else:
-            self.testVector()
-        
-        texts_after = processor.rm_tokens(self.posts)   # 得到去除停用词的文档二维数组
-        self.dictionary = processor.build_dictionary(texts_after) # 构建字典
-        self.corpus = processor.build_tfidfModel(texts_after) # 通过构建的字典构建语料库(corpus tfidf),得到包含tfidf的文档向量
-        # filename = LIB_NAME+'.pkl'
-        # if os.path.exists(filename):
-        #     print "model already exists"
-        #     self.lsi = models.LsiModel.load(LIB_NAME+'.pkl')
-        # else:
-        #     print "processing new model..."
-        #     self.lsi = self.build_topicModel(self.corpus, self.dictionary)
-        #     self.lsi.save(LIB_NAME+'.pkl')
-        
-        self.lsi = self.build_topicModel(self.corpus, self.dictionary)
-            
-        
+            print "processing new model..."
+            if env == 1:
+                self.process_all_documents()
+            else:
+                self.testVector()
+            texts_after = processor.rm_tokens(self.posts)   # 得到去除停用词的文档二维数组
+            self.dictionary = processor.build_dictionary(texts_after) # 构建字典
+            self.corpus = processor.build_tfidfModel(texts_after) # 通过构建的字典构建语料库(corpus tfidf),得到包含tfidf的文档向量
+            self.lsi = self.build_topicModel(self.corpus, self.dictionary)
+            self.index = self.build_index()
+            self.dump_data()
 
+    def load_data(self):
+        self.lsi = models.LsiModel.load(LIB_NAME+'.pkl')
+        self.index = pickle.load(open(LIB_NAME+"_index.dat","r"))
+        self.dictionary = pickle.load(open(LIB_NAME+"_dictionary.dat","r"))
+
+    def dump_data(self):
+        self.lsi.save(LIB_NAME+'.pkl')
+        pickle.dump(self.index, open(LIB_NAME+"_index.dat","w"))
+        pickle.dump(self.dictionary, open(LIB_NAME+"_dictionary.dat","w"))
+        
     def build_index(self):
-        self.index = similarities.MatrixSimilarity(self.lsi[self.corpus])
+        # self.index = pickle.load(open(LIB_NAME+".dat","r"))
+        index = similarities.MatrixSimilarity(self.lsi[self.corpus])
+        # pickle.dump(self.index, open(LIB_NAME+".dat","w"))
+        # print index
+        return index
 
-    def find(self, input_bow):
+
+    def find(self, processor, query):
         # topics = [self.lsi[c] for c in self.corpus]
         # print topics[1]
+        input_bow = processor.process_input(self.dictionary, query)
         input_lsi = self.lsi[input_bow] # 将搜索的关键字的词袋映射到主题模型
         # print input_lsi
         sort_input_lsi = sorted(input_lsi, key=lambda item:  -item[1])
@@ -164,12 +177,11 @@ if __name__ == '__main__':
     processor = Processor() 
     filename = LIB_NAME+'.pkl'
     topic.train(processor,environment)
-    topic.build_index()
     # query = "silver trunk"
     query = "dependency injection Jersey integration"
-    query_bow = processor.process_input(query)
+    
     print "==== searching" , query , " ... ===="
-    topic.find(query_bow)
+    topic.find(processor, query)
     
     
    
