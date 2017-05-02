@@ -22,7 +22,7 @@ class documentManager(object):
 	def connect_mongo(self):
 		client = MongoClient(MONGO_HOST,MONGO_PORT)
 		db = client[MONGO_DB_NAME]
-		collection = db.sof_data_collection
+		collection = db[MONGO_DB_TABLE+LIB_NAME]
 		return collection
 
 	def connect_analyze(self):
