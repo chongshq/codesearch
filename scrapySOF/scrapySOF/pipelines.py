@@ -11,10 +11,16 @@ from pymongo import MongoClient
 
 class ScrapysofPipeline(object):
     def __init__(self):
-		connection = MongoClient(settings['MONGO_HOST'], settings['MONGO_PORT'])
-		db = connection[settings['MONGO_DB_NAME']]
-		self.collection = db[settings['MONGO_DB_TABLE']+settings['LIB_NAME']]
-        
+        connection = MongoClient(settings['MONGO_HOST'], settings['MONGO_PORT'])
+        db = connection[settings['MONGO_DB_NAME']]
+        self.collection = db[settings['MONGO_DB_TABLE']+settings['LIB_NAME']]
+
+    def open_spider(self, spider):
+        print "starting pipeline for DB:", settings['LIB_NAME']
+
+    def close_spider(self, spider):
+        self.collection.ensureIndex({'code':"text"})
+
     def process_item(self, item, spider):
         valid = True
         for data in item:

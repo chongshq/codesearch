@@ -168,4 +168,4 @@ MONGO_PORT = 27017
 MONGO_DB_NAME = 'data_db'
 MONGO_DB_TABLE = 'sof_data_collection_'
 
-LIB_NAME = 'log4j'
+LIB_NAME = 'jsoup'

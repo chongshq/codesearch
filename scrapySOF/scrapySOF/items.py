@@ -58,7 +58,7 @@ class ScrapysofItem(scrapy.Item):
             if(haveCode):   # 判断回答中是否用代码
                 itemCode = ""
                 for c in answerText('code'):
-                    itemCode = itemCode + "\n"+PyQuery(c).html()     # 获取完整代码
+                    itemCode = itemCode + "\n"+ self.getValidCode(c)     # 获取完整代码
                 itemAnswer = re.sub(patternCode, "", answerText.html())
                 itemStar = items.xpath('.//div[@class="vote"]//span[contains(@class,"vote-count-post")]/text()').extract_first()
                 
@@ -75,3 +75,10 @@ class ScrapysofItem(scrapy.Item):
         else:
             print "not found answer"
             return None
+
+    def getValidCode(self, code):
+        tempCode = PyQuery(code).html()
+        if tempCode.find('=') or tempCode.find('.')  or tempCode.find('@')  or tempCode.find(';'):
+            return tempCode
+        else:
+            return ""
