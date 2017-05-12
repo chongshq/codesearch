@@ -11,9 +11,13 @@ from pymongo import MongoClient
 
 class ScrapysofPipeline(object):
     def __init__(self):
+        if settings['ENV'] == 1:
+            tableName = settings['MONGO_DB_TABLE_APIDOC']+settings['LIB_NAME']
+        else:
+            tableName = settings['MONGO_DB_TABLE']+settings['LIB_NAME']
         connection = MongoClient(settings['MONGO_HOST'], settings['MONGO_PORT'])
         db = connection[settings['MONGO_DB_NAME']]
-        self.collection = db[settings['MONGO_DB_TABLE']+settings['LIB_NAME']]
+        self.collection = db[tableName]
 
     def open_spider(self, spider):
         print "starting pipeline for DB:", settings['LIB_NAME']

@@ -9,6 +9,28 @@ import scrapy
 import re
 from pyquery import PyQuery
 
+class ScrapyApiDocItem(scrapy.Item):
+    # define the fields for your item here like:
+    title = scrapy.Field()
+    url = scrapy.Field()
+    code = scrapy.Field()
+
+    def getTitle(self, content):
+        titleTemp = PyQuery(content.xpath('.//div[@class="title"]').extract_first())
+        title = titleTemp.html()
+        return title
+        
+    def getCode(self, content):
+        codeSet = PyQuery(content.xpath('.//div[@class="content"]').extract_first()) 
+        haveCode = codeSet('code')
+        itemCode = ""
+        count = 0
+        for c in codeSet('code'):
+            count = count + 1
+            print "have ", count, " piece of code"
+            itemCode = itemCode + "\n"+ PyQuery(c).html()     # 获取完整代码
+        return itemCode
+        # print "code: ",itemCode
 
 class ScrapysofItem(scrapy.Item):
     # define the fields for your item here like:
