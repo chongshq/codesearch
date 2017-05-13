@@ -2,7 +2,7 @@
 - please visit my website **[code search](http://codesearch.qiancs.cn)**
 ## Related project
 - **[ui front end](https://github.com/qiancs1101/codesearch-ui.git)**
-- **[node back end](https://github.com/qiancs1101/codesearch-node.git)**
+- **[node back end api](https://github.com/qiancs1101/codesearch-node.git)**
 
 # For this repo
 
@@ -15,3 +15,4 @@
 7. data source for sof and api doc by using **scrapy**: 
    - `stackoverflow` to get accepted answer and filter valid code example.
    - `api doc` to get offical example code.
+8. programming language: python, database for storing raw data: MongoDB
