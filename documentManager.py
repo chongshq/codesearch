@@ -24,6 +24,18 @@ class documentManager(object):
 		db = client[MONGO_DB_NAME]
 		collection = db[MONGO_DB_TABLE+LIB_NAME]
 		return collection
+	
+	def connect_mongo_sof(self, lib):
+		client = MongoClient(MONGO_HOST,MONGO_PORT)
+		db = client[MONGO_DB_NAME]
+		collection = db[MONGO_DB_TABLE+lib]
+		return collection
+
+	def connect_mongo_lib(self):
+		client = MongoClient(MONGO_HOST,MONGO_PORT)
+		db = client[MONGO_DB_NAME]
+		collection = db[MONGO_DB_TABLE_LIB]
+		return collection
 
 	def connect_analyze(self):
 		client = MongoClient(MONGO_HOST,MONGO_PORT)

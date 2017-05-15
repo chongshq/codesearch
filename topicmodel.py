@@ -42,7 +42,7 @@ class TopicModel(object):
         self.best_dist = sys.maxint  # 最相似
         self.best_i = None
         self.posts = []
-
+        self.libList = []
         self.corpus = None
         self.dictionary = None
         self.lsi = None
@@ -50,11 +50,20 @@ class TopicModel(object):
         #self.process_all_documents()
         #self.testVector()
 
+    def get_libs(self):    # 获取已经爬取的库列表
+        self.manager = documentManager()
+        collection = self.manager.connect_mongo_lib()
+        for loop in collection.find({}):
+            # if i == 30:
+            #     break
+            question = loop["name"]
+            self.libList.append(question)
 
     # 处理所有 MongoDB 中的文档，统计结果 得到 向量化的且经过文本处理的 二维数组 到MongoDB 的分析库  中
-    def process_all_documents(self):
+    def process_all_documents(self, lib):
         self.manager = documentManager()
-        collection = self.manager.connect_mongo()
+        self.posts = []
+        collection = self.manager.connect_mongo_sof(lib)
         i = 0
         print "==== start process document ====="
         start = time.clock()
@@ -116,34 +125,38 @@ class TopicModel(object):
         self.posts = ["Shipment of gold damaged in a fire <init> !!","Delivery of silver arrived in a silver truck","Shipment of gold arrived in a truck"]
         
 
-    def train(self, processor, env):    # 训练主题模型
-        
-        filename = LIB_NAME+'.pkl'
-        if os.path.exists(filename):
-            print "model already exists"
-            self.load_data()
-        else:
-            print "processing new model..."
-            if env == 1:
-                self.process_all_documents()
+    def train(self, processor, env):    # 训练全部主题模型
+        self.get_libs()
+        for lib in self.libList:
+            filename = lib+'.pkl'
+            if os.path.exists(filename):
+                print lib, "model already exists"
+                # self.load_data()
             else:
-                self.testVector()
-            texts_after = processor.rm_tokens(self.posts)   # 得到去除停用词的文档二维数组
-            self.dictionary = processor.build_dictionary(texts_after) # 构建字典
-            self.corpus = processor.build_tfidfModel(texts_after) # 通过构建的字典构建语料库(corpus tfidf),得到包含tfidf的文档向量
-            self.lsi = self.build_topicModel(self.corpus, self.dictionary)
-            self.index = self.build_index()
-            self.dump_data()
+                print "processing new model...", lib
+                if env == 1:
+                    self.process_all_documents(lib)
+                else:
+                    self.testVector()
+                texts_after = processor.rm_tokens(self.posts)   # 得到去除停用词的文档二维数组
+                self.dictionary = processor.build_dictionary(texts_after) # 构建字典
+                self.corpus = processor.build_tfidfModel(texts_after) # 通过构建的字典构建语料库(corpus tfidf),得到包含tfidf的文档向量
+                self.lsi = self.build_topicModel(self.corpus, self.dictionary)
+                self.index = self.build_index()
+                self.dump_data(lib)
+                print "Completed!"
+        
 
-    def load_data(self):
-        self.lsi = models.LsiModel.load(LIB_NAME+'.pkl')
-        self.index = pickle.load(open(LIB_NAME+"_index.dat","r"))
-        self.dictionary = pickle.load(open(LIB_NAME+"_dictionary.dat","r"))
+    def load_data(self,lib):
+        self.lsi = models.LsiModel.load(lib+'.pkl')
+        self.index = pickle.load(open(lib+"_index.dat","r"))
+        self.dictionary = pickle.load(open(lib+"_dictionary.dat","r"))
 
-    def dump_data(self):
-        self.lsi.save(LIB_NAME+'.pkl')
-        pickle.dump(self.index, open(LIB_NAME+"_index.dat","w"))
-        pickle.dump(self.dictionary, open(LIB_NAME+"_dictionary.dat","w"))
+    def dump_data(self,lib):
+        self.lsi.save(lib+'.pkl')
+        pickle.dump(self.index, open(lib+"_index.dat","w"))
+        pickle.dump(self.dictionary, open(lib+"_dictionary.dat","w"))
+        print "all data dumped"
         
     def build_index(self):
         # self.index = pickle.load(open(LIB_NAME+".dat","r"))
@@ -178,10 +191,10 @@ if __name__ == '__main__':
     filename = LIB_NAME+'.pkl'
     topic.train(processor,environment)
     # query = "silver trunk"
-    query = "dependency injection Jersey integration"
+    # query = "dependency"
     
-    print "==== searching" , query , " ... ===="
-    topic.find(processor, query)
+    # print "==== searching" , query , " ... ===="
+    # topic.find(processor, query)
     
     
    

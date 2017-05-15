@@ -5,5 +5,5 @@ MONGO_PORT = 27017
 MONGO_DB_NAME = 'data_db'
 MONGO_DB_TABLE = 'sof_data_collection_'
 MONGO_DB_TABLE_ANALYZE = 'sof_data_analyzed_'
-
+MONGO_DB_TABLE_LIB = 'lib_collection'
 LIB_NAME = 'jersey'
