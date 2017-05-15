@@ -125,8 +125,9 @@ class TopicModel(object):
         self.posts = ["Shipment of gold damaged in a fire <init> !!","Delivery of silver arrived in a silver truck","Shipment of gold arrived in a truck"]
         
 
-    def train(self, processor, env):    # 训练全部主题模型
+    def train(self, env):    # 训练全部主题模型
         self.get_libs()
+        processor = Processor()
         for lib in self.libList:
             filename = lib+'.pkl'
             if os.path.exists(filename):
@@ -189,7 +190,7 @@ if __name__ == '__main__':
     topic = TopicModel()
     processor = Processor() 
     filename = LIB_NAME+'.pkl'
-    topic.train(processor,environment)
+    topic.train(environment)
     # query = "silver trunk"
     # query = "dependency"
     
