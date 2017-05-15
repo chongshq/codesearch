@@ -18,12 +18,14 @@ class ScrapysofPipeline(object):
         connection = MongoClient(settings['MONGO_HOST'], settings['MONGO_PORT'])
         db = connection[settings['MONGO_DB_NAME']]
         self.collection = db[tableName]
+        self.lib_collection = db['MONGO_DB_TABLE_LIB']
 
     def open_spider(self, spider):
         print "starting pipeline for DB:", settings['LIB_NAME']
 
     def close_spider(self, spider):
-        self.collection.ensureIndex({'code':"text"})
+        self.collection.ensure_index("code", unique=True)
+        self.lib_collection.insert({"name":'LIB_NAME',"language":"java"})
 
     def process_item(self, item, spider):
         valid = True
