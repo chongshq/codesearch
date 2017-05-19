@@ -169,5 +169,5 @@ MONGO_DB_NAME = 'data_db'
 MONGO_DB_TABLE = 'sof_data_collection_'
 MONGO_DB_TABLE_APIDOC = 'apidoc_data_collection_'
 MONGO_DB_TABLE_LIB = 'lib_collection'
-ENV = 0 # 0: sof ; 1: API DOC
+ENV = 1 # 0: sof ; 1: API DOC
 LIB_NAME = 'spring-mvc'

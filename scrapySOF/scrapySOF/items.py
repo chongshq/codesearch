@@ -31,6 +31,16 @@ class ScrapyApiDocItem(scrapy.Item):
             itemCode = itemCode + "\n"+ PyQuery(c).html()     # 获取完整代码
         return itemCode
         # print "code: ",itemCode
+    def getCode_springmvc(self, content):
+        pre = content.xpath('.//pre')
+        
+        code = PyQuery(pre.extract_first())
+        itemCode = ""
+        
+        if code('code').attr('class') == 'language-java':
+            itemCode = itemCode + "\n"+ PyQuery(code('code')).html()     # 获取完整代码
+        return itemCode
+        # print "code: ",itemCode
 
 class ScrapysofItem(scrapy.Item):
     # define the fields for your item here like:
