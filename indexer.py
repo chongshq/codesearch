@@ -3,6 +3,7 @@
 import string
 import pickle
 from documentManager import documentManager
+from cluster import CosineSim
 
 class Indexer(object):
 	
@@ -36,11 +37,12 @@ class Indexer(object):
 		for loop in collection.find({}):
 			question = loop["question"]
 			answer = loop["answer"]
-			_id = loop["_id"]
+			code_clean = loop["code"]   # should be code_clean
+			_id = loop["id"]
 			print _id
 			#print _id.str
 			# code = loop["code"]
-			self.count_words(answer, _id)
+			self.count_words(code_clean, _id)
 
 	# 对统计结果 <word, DocID, Freq> 排序
 	def sort_index(self):
@@ -62,7 +64,7 @@ class Indexer(object):
 	def make_dictionnary(self):
 		word_dictionary = {}
 
-		file_in = open('text/sof-result','r')
+		file_in = open('text/sof-result-sorted','r')
 		line = file_in.readline()
 		while line:
 			items = line[:-1].split('\t')

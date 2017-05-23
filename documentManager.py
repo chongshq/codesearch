@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import pickle
 import re
 import sys
-from scrap import scrapy_test
+
 from settings import *
 
 reload(sys)

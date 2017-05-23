@@ -4,6 +4,7 @@
 import pickle
 import math
 from documentManager import documentManager
+from cluster import CosineSim
 from bson.objectid import ObjectId
 
 class indexSearcher(object):
@@ -98,9 +99,12 @@ class indexSearcher(object):
 
 		id_list = []
 		for word in self.word_dictionary[word]:
-			url = collection.find_one({"_id": ObjectId(word[0])})["url"]
+			print word[0]
+			data = collection.find_one({"id": word[0]})
+			# url = data["url"]
 			id_list.append(word[0])
-		return id_list
+		print id_list
+		return id_list   # 文档id列表
 
 	def perform_query(self, query_input):
 		id_list = []
@@ -108,19 +112,21 @@ class indexSearcher(object):
 		words = query_input.split(' ')
 		
 		for word in words:
-			self.retrive_word(word)
-			score_dict = self.caculate_TFIDF(word)
+			self.id_list = self.retrive_word(word)
+			cos = CosineSim()
+			cos.getBestFromDoc(query_input, self.id_list)
+			# score_dict = self.caculate_TFIDF(word)
 
-			count = 0
-			for pair in score_dict:
-				if count == output_num:
-					break
-				else:
-					count += 1
-					id_list.append(pair[0])
-		return id_list
+		# 	count = 0
+		# 	for pair in score_dict:
+		# 		if count == output_num:
+		# 			break
+		# 		else:
+		# 			count += 1
+		# 			id_list.append(pair[0])
+		# return id_list
 				
 if __name__ == '__main__':
 	searcher = indexSearcher()
-	# print searcher.perform_query("literature science")
-	searcher.caculate_BM25("Genson")
+	searcher.perform_query("ApiOperation")
+	# searcher.caculate_BM25("Genson")

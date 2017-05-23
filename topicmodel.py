@@ -132,7 +132,7 @@ class TopicModel(object):
             filename = lib+'.pkl'
             if os.path.exists(filename):
                 print lib, "model already exists"
-                # self.load_data()
+                # self.load_data(lib)
             else:
                 print "processing new model...", lib
                 if env == 1:
@@ -149,7 +149,7 @@ class TopicModel(object):
         
 
     def load_data(self,lib):
-        self.lsi = models.LsiModel.load(lib+'.pkl')
+        self.lsi = models.LdaModel.load(lib+'.pkl')
         self.index = pickle.load(open(lib+"_index.dat","r"))
         self.dictionary = pickle.load(open(lib+"_dictionary.dat","r"))
 
@@ -167,14 +167,21 @@ class TopicModel(object):
         return index
 
 
-    def find(self, processor, query):
+    def find(self,uery):
         # topics = [self.lsi[c] for c in self.corpus]
         # print topics[1]
+        processor = Processor()
         input_bow = processor.process_input(self.dictionary, query)
         input_lsi = self.lsi[input_bow] # 将搜索的关键字的词袋映射到主题模型
         # print input_lsi
         sort_input_lsi = sorted(input_lsi, key=lambda item:  -item[1])
-        print "similar topic: ===>", sort_input_lsi[0]
+        count = 0
+        for result in sort_input_lsi:
+            if count == 3:
+                break
+            print "similar topic: ===>", self.lsi.show_topic(sort_input_lsi[count][0])
+            count = count + 1
+        
         sims = self.index[input_lsi] # 映射到文档预料库的索引中，求得和每个文档的相似度
         # print sims
         sort_sims = sorted(enumerate(sims), key=lambda item: -item[1])
@@ -184,18 +191,23 @@ class TopicModel(object):
                 break
             print "similar article: ===>", sort_sims[count]
             count = count + 1
+    
+    def show_topics(self, lib):
+        self.load_data(lib)
+        print self.lsi.show_topics()
         
 
 if __name__ == '__main__':
     topic = TopicModel()
-    processor = Processor() 
-    filename = LIB_NAME+'.pkl'
-    topic.train(environment)
+    
+    # topic.train(environment)
+    # topic.show_topics(LIB_NAME)
     # query = "silver trunk"
-    # query = "dependency"
+    # query = "association"
     
     # print "==== searching" , query , " ... ===="
-    # topic.find(processor, query)
+    # topic.find(query)
+
     
     
    
