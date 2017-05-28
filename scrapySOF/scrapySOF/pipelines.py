@@ -26,6 +26,7 @@ class ScrapysofPipeline(object):
     def close_spider(self, spider):
         # self.collection.ensure_index("code_clean", unique=True)
         # self.lib_collection.insert({"name":'LIB_NAME',"language":"java"})
+        print "finish"
 
     def process_item(self, item, spider):
         valid = True
