@@ -98,7 +98,7 @@ class CosineSim(object):
             for i in range(len(weight)):#打印每类文本的tf-idf词语权重，第一个for遍历所有文本，第二个for便利某一类文本下的词语权重
                 print u"-------第",i,u"个帖子的词语tf-idf权重------"
                 for j in range(len(word_dictionary)):
-                    # print word_dictionary[j],weight[i][j]
+                    # print word_dictionary[j],weight[i][j]   # 权重矩阵的行即为字典的单词id
                     continue
             # collection = self.manager.connect_analyze()
             # collection.insert({"libname": LIB_NAME,"vector":Binary(pickle.dumps(self.X.toarray(), protocol=2))})

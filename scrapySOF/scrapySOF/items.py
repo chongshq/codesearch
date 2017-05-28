@@ -14,12 +14,21 @@ class ScrapyApiDocItem(scrapy.Item):
     title = scrapy.Field()
     url = scrapy.Field()
     code = scrapy.Field()
+    code_clean = scrapy.Field()
 
     def getTitle(self, content):
         titleTemp = PyQuery(content.xpath('.//div[@class="title"]').extract_first())
         title = titleTemp.html()
         return title
         
+    def getCleanCode(self, content):
+        pS = re.compile(
+                    r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+                    re.DOTALL | re.MULTILINE
+                )
+        cleanCode = re.sub(pS, "", content)
+        return cleanCode
+
     def getCode(self, content):
         codeSet = PyQuery(content.xpath('.//div[@class="content"]').extract_first()) 
         haveCode = codeSet('code')
@@ -38,7 +47,12 @@ class ScrapyApiDocItem(scrapy.Item):
         itemCode = ""
         
         if code('code').attr('class') == 'language-java':
-            itemCode = itemCode + "\n"+ PyQuery(code('code')).html()     # 获取完整代码
+            pS = re.compile(
+                    r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+                    re.DOTALL | re.MULTILINE
+                )
+            code = re.sub(pS, "", PyQuery(code('code')).html() )
+            itemCode = itemCode + "\n"+ code    # 获取完整代码
         return itemCode
         # print "code: ",itemCode
 
@@ -51,6 +65,7 @@ class ScrapysofItem(scrapy.Item):
     answer = scrapy.Field()
     answer_stars = scrapy.Field()
     code = scrapy.Field()
+    code_clean = scrapy.Field()
 
     def getStackItem(self,response,item):
         item = self.getStackAnswer(response,item)
@@ -97,6 +112,7 @@ class ScrapysofItem(scrapy.Item):
                 item['answer'] = itemAnswer
                 item['answer_stars'] = itemStar
                 item['code'] = itemCode
+                item['code_clean'] = self.getCleanCode(itemCode)
                 #print itemCode
                 
                 return item
@@ -110,7 +126,16 @@ class ScrapysofItem(scrapy.Item):
 
     def getValidCode(self, code):
         tempCode = PyQuery(code).html()
-        if tempCode.find('=') or tempCode.find('.')  or tempCode.find('@')  or tempCode.find(';'):
+        if tempCode.find('=') or tempCode.find('.')  or tempCode.find('@')  or tempCode.find(';') or len(tempCode) > 15:
             return tempCode
         else:
             return ""
+    
+    def getCleanCode(self, code):
+        
+        pS = re.compile(
+                r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+                re.DOTALL | re.MULTILINE
+            )
+        cleanCode = re.sub(pS, "", code)
+        return cleanCode

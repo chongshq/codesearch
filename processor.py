@@ -36,7 +36,7 @@ class StemmedTfidfVectorizer(TfidfVectorizer):
 
 class Processor(object):
     def __init__(self):
-        self.english_punctuations = [',', '.', ':', ';', '?', '(', ')', '[', ']', '&', '!', '*', '@', '#', '$', '%', '<', '>']
+        self.english_punctuations = [',', '.', ':', ';', '?', '(', ')', '[', ']', '&', '!', '*', '@', '#', '$', '%', '<', '>','=','/','--']
 
     # 处理所有 MongoDB 中的文档，统计结果 得到 向量化的且经过文本处理的 二维数组 到MongoDB 的分析库  中
     def rm_tokens(self, passages_before):  # nltk 去掉一些停用次和数字
@@ -44,10 +44,13 @@ class Processor(object):
         s = nltk.stem.SnowballStemmer('english')
         h= HTMLParser.HTMLParser()
         words_list = []
-        for document in passages_before:
-            document = h.unescape(document)     # html转移失败的字符 : <>
-            # deleteNumAndChar = re.compile(r'[^a-zA-Z0-9]+', re.S)
-            # document = re.sub(deleteNumAndChar, " ", document)  # 去除文本中的特殊字符和数字
+        for document_temp in passages_before:
+            document_temp = h.unescape(document_temp)     # html转移失败的字符 : <>
+            deleteNumAndChar = re.compile(r'[\s+\.\!\/_,$%^*(+\"\']+|[+——！，。？、~@#￥%……&*（）]+', re.S)
+            document_temp = re.sub(deleteNumAndChar, " ", document_temp)  # 去除文本中的特殊字符和数字
+            document = str(document_temp)
+            document = document.translate(None, string.punctuation)
+            
             # word_list = []
             # for word in document.lower().split():
             #     if word in self.stop_words:
@@ -58,8 +61,9 @@ class Processor(object):
             # words_list.append(word_list)
             texts_tokenized = [word.lower() for word in nltk.tokenize.word_tokenize(document.decode('utf-8'))] 
             texts_filtered_stopwords = [word for word in texts_tokenized if not word in stopwords.words('english')] 
-            texts_filtered = [word for word in texts_filtered_stopwords if not word in self.english_punctuations] 
+            texts_filtered = [s.stem(word) for word in texts_filtered_stopwords if not word in self.english_punctuations] 
             words_list.append(texts_filtered)
+            # print texts_filtered
         # print words_list
         print "==== tokenization complete ===="
         return words_list
@@ -67,6 +71,7 @@ class Processor(object):
     def build_dictionary(self, passages_after):
         print "==== build dictionary from tokenized text ... ===="
         self.dictionary = corpora.Dictionary(passages_after)
+        # print self.dictionary.token2id
         print "====  dictionary complete ===="
         return self.dictionary
     
@@ -76,14 +81,22 @@ class Processor(object):
         # print corpus
         tfidf = models.TfidfModel(corpus)
         corpus_tfidf = tfidf[corpus]
-        # for doc in corpus_tfidf:
-        #     print "doc in corpus tfidf:=====>",doc
+        for doc in corpus_tfidf:
+            print "doc in corpus tfidf:=====>",doc
         print "==== tfidf model complete ===="
         return corpus_tfidf
     
     def process_input(self, dictionary, input):  # 映射到词袋
-        query_bow = dictionary.doc2bow(input.lower().split())
-        # print query_bow
+        s = nltk.stem.SnowballStemmer('english')
+        h= HTMLParser.HTMLParser()
+        input_temp = h.unescape(input)     # html转移失败的字符 : <>
+        deleteNumAndChar = re.compile(r'[\s+\.\!\/_,$%^*(+\"\']+|[+——！，。？、~@#￥%……&*（）]+', re.S)
+        input_temp = re.sub(deleteNumAndChar, " ", input_temp)  # 去除文本中的特殊字符和数字
+        new_input = str(input_temp)
+        new_input = new_input.translate(None, string.punctuation)
+        tokenize_input = [s.stem(word.lower()) for word in nltk.tokenize.word_tokenize(new_input.decode('utf-8'))] 
+        query_bow = dictionary.doc2bow(tokenize_input)
+        print "searching for:",tokenize_input,"\n",query_bow
         return query_bow
 
 if __name__ == '__main__':

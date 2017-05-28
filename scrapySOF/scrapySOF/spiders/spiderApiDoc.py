@@ -38,6 +38,7 @@ class ApiDocSpider(scrapy.Spider):
             content = sel
             title = page.getTitle(content)
             code = page.getCode(content)
+            cleanCode = page.getCleanCode(code)
             url = response.url
             if title:
                 page['title'] = title
@@ -45,4 +46,5 @@ class ApiDocSpider(scrapy.Spider):
                 page['title'] = 'No title'
             page['url'] = url
             page['code'] = code
+            page['code_clean'] = cleanCode
             yield page

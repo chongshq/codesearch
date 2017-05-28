@@ -47,12 +47,14 @@ class ApiDocSpider(scrapy.Spider):
         contentList = response.xpath('//div[@class="content"]')
         for content in contentList:
             code = page.getCode_springmvc(content)
+            cleanCode = page.getCleanCode(code)
             if code == "":
                 continue
             else:    
                 page['url'] = response.url
                 page['title'] = title
                 page['code'] = code
+                page['code_clean'] = cleanCode
                 print title, response.url, code
                 yield page
         # page['question'] = response.xpath('//*[@id="question"]/table/tbody/tr[1]//td[@class="postcell"]//div[@class="post-text"]').extract()

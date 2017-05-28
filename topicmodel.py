@@ -124,7 +124,7 @@ class TopicModel(object):
     def testVector(self):
         self.posts = ["Shipment of gold damaged in a fire <init> !!","Delivery of silver arrived in a silver truck","Shipment of gold arrived in a truck"]
         
-
+   
     def train(self, env):    # 训练全部主题模型
         self.get_libs()
         processor = Processor()
@@ -167,7 +167,7 @@ class TopicModel(object):
         return index
 
 
-    def find(self,uery):
+    def find(self,query):
         # topics = [self.lsi[c] for c in self.corpus]
         # print topics[1]
         processor = Processor()
@@ -201,7 +201,7 @@ if __name__ == '__main__':
     topic = TopicModel()
     
     # topic.train(environment)
-    # topic.show_topics(LIB_NAME)
+    topic.show_topics(LIB_NAME)
     # query = "silver trunk"
     # query = "association"
     
