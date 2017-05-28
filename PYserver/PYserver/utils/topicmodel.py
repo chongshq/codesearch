@@ -47,6 +47,9 @@ class TopicModel(object):
         self.dictionary = None
         self.lsi = None
         self.index = None
+        self.ldaList = {}
+        self.dictionaryList = {}
+        self.indexList = {}
         self.manager = documentManager()
         #self.process_all_documents()
         #self.testVector()
@@ -101,7 +104,7 @@ class TopicModel(object):
 
     def build_topicModel(self, corpus, dictionary):
         print "==== generating topic model ... ===="
-        lsi = models.LdaModel(corpus = corpus, id2word=dictionary, num_topics = 50
+        lsi = models.LdaModel(corpus = corpus, id2word=dictionary, num_topics = 225
                     # ,update_every = 1,chunksize = 10000
                     )
         
@@ -154,6 +157,14 @@ class TopicModel(object):
         self.index = pickle.load(open("PYserver/utils/"+lib+"_index.dat","r"))
         self.dictionary = pickle.load(open("PYserver/utils/"+lib+"_dictionary.dat","r"))
 
+    def load_to_cache(self):
+        self.get_libs()
+        for lib in self.libList:
+
+            self.ldaList[lib] = models.LdaModel.load("PYserver/utils/"+lib+'.pkl')
+            self.indexList[lib] = pickle.load(open("PYserver/utils/"+lib+"_index.dat","r"))
+            self.dictionaryList[lib] = pickle.load(open("PYserver/utils/"+lib+"_dictionary.dat","r"))
+
     def dump_data(self,lib):
         self.lsi.save("PYserver/utils/"+lib+'.pkl')
         pickle.dump(self.index, open("PYserver/utils/"+lib+"_index.dat","w"))
@@ -184,6 +195,40 @@ class TopicModel(object):
             count = count + 1
         
         sims = self.index[input_lsi] # 映射到文档预料库的索引中，求得和每个文档的相似度
+        # print sims
+        sort_sims = sorted(enumerate(sims), key=lambda item: -item[1])
+        count = 0
+        collection = self.manager.connect_mongo_sof(lib)
+        results=[]
+        for result in sort_sims:
+            if count == 5:
+                break
+            print "similar article: ===>", sort_sims[count]
+            temp = collection.find_one({"id":sort_sims[count][0]})
+            temp_result = {}
+            temp_result["title"] = temp["title"]
+            temp_result["url"] = temp["url"]
+            temp_result["code"] = temp["code"]
+            results.append(temp_result)
+            count = count + 1
+        return results
+
+    def find_cache(self,query,lib):
+        # topics = [self.lsi[c] for c in self.corpus]
+        # print topics[1]
+        processor = Processor()
+        input_bow = processor.process_input(self.dictionaryList[lib], query)
+        input_lsi = self.ldaList[lib][input_bow] # 将搜索的关键字的词袋映射到主题模型
+        # print input_lsi
+        sort_input_lsi = sorted(input_lsi, key=lambda item:  -item[1])
+        count = 0
+        for result in sort_input_lsi:
+            if count == 3:
+                break
+            print "similar topic: ===>", self.ldaList[lib].show_topic(sort_input_lsi[count][0])
+            count = count + 1
+        
+        sims = self.indexList[lib][input_lsi] # 映射到文档预料库的索引中，求得和每个文档的相似度
         # print sims
         sort_sims = sorted(enumerate(sims), key=lambda item: -item[1])
         count = 0

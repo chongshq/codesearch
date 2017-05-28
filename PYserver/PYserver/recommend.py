@@ -8,6 +8,7 @@ import json
 
 
 model = TopicModel()
+model.load_to_cache()
 print settings.BASE_DIR
 
  
@@ -18,13 +19,13 @@ def search_form(request):
 # 接收请求数据
 def search(request):  
     request.encoding='utf-8'
-    print model.show_topics("hibernate")
-    
+    # print model.show_topics("hibernate")
+    response_data = {}  
     if 'q' in request.GET:
         message = '你搜索的内容为: ' + request.GET['q']
-        result_list = model.find(request.GET['q'],request.GET['lib'])
+        result_list = model.find_cache(request.GET['q'],request.GET['lib'])
+        response_data['result'] = result_list 
     else:
         message = '你提交了空表单'
-    response_data = {}  
-    response_data['result'] = result_list 
+    
     return HttpResponse(json.dumps(response_data), content_type="application/json")

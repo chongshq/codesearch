@@ -20,7 +20,7 @@ ITEM_PIPELINES = {'scrapySOF.pipelines.ScrapysofPipeline':1000}
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
-DOWNLOAD_DELAY= 1
+DOWNLOAD_DELAY= 0.75
 HTTPERROR_ALLOWED_CODES = [429]
 COOKIES_ENABLED=False
 USER_AGENTS = [
@@ -170,4 +170,4 @@ MONGO_DB_TABLE = 'sof_data_collection_'
 MONGO_DB_TABLE_APIDOC = 'apidoc_data_collection_'
 MONGO_DB_TABLE_LIB = 'lib_collection'
 ENV = 0 # 0: sof ; 1: API DOC
-LIB_NAME = 'jsoup'
+LIB_NAME = 'spring-mvc'
