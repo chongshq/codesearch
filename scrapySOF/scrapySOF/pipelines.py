@@ -24,7 +24,7 @@ class ScrapysofPipeline(object):
         print "starting pipeline for DB:", settings['LIB_NAME']
 
     def close_spider(self, spider):
-        self.collection.ensure_index("code", unique=True)
+        self.collection.ensure_index("code_clean", unique=True)
         self.lib_collection.insert({"name":'LIB_NAME',"language":"java"})
 
     def process_item(self, item, spider):
