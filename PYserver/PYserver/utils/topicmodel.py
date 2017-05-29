@@ -167,7 +167,7 @@ class TopicModel(object):
             self.dictionaryList[lib] = pickle.load(open("PYserver/utils/models/"+lib+"_dictionary.dat","r"))
 
     def dump_data(self,lib):
-        self.lsi.save(lib+'.pkl')
+        self.lsi.save("models/"+lib+'.pkl')
         pickle.dump(self.index, open("models/"+lib+"_index.dat","w"))
         pickle.dump(self.dictionary, open("models/"+lib+"_dictionary.dat","w"))
         print "all data dumped"
