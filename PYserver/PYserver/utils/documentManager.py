@@ -29,6 +29,7 @@ class documentManager(object):
 		client = MongoClient(MONGO_HOST,MONGO_PORT)
 		db = client[MONGO_DB_NAME]
 		collection = db[MONGO_DB_TABLE+lib]
+		print "connect to ",MONGO_DB_NAME,MONGO_DB_TABLE,lib
 		return collection
 
 	def connect_mongo_lib(self):

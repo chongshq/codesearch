@@ -8,7 +8,7 @@ import json
 
 
 model = TopicModel()
-model.load_to_cache()
+model.load_to_cache(model.get_libs())
 print settings.BASE_DIR
 
  

@@ -10,9 +10,33 @@ from bson.objectid import ObjectId
 class indexSearcher(object):
 	
 	def __init__(self):
-		self.mydb = open('sof-postings', 'r')
-		self.word_dictionary = pickle.load(self.mydb)
 
+		self.libList = ["jsoup"]  #mock
+		self.id_list = []
+		self.indexList = {}
+		self.manager = documentManager()
+	
+	def get_libs(self):    # 获取已经爬取的库列表
+		self.manager = documentManager()
+		collection = self.manager.connect_mongo_lib()
+		for loop in collection.find({}):
+			question = loop["name"]
+			self.libList.append(question)
+		return self.libList
+
+	def load_index_cache(self, liblist):
+		for lib in liblist:
+
+			self.mydb = open('PYserver/utils/index/sof-postings-'+ lib, 'r')
+			self.word_dictionary = pickle.load(self.mydb)
+			self.indexList[lib] = self.word_dictionary
+
+	def load_index_test(self, liblist):
+		for lib in liblist:
+
+			self.mydb = open('index/sof-postings-'+ lib, 'r')
+			self.word_dictionary = pickle.load(self.mydb)
+			self.indexList[lib] = self.word_dictionary
 	# 计算每个文档的 TF-IDF 值，进行排序
 	def caculate_TFIDF(self, word):
 		score_dictionary = {}
@@ -92,31 +116,50 @@ class indexSearcher(object):
 			print self.DocID2Doc(i[0])
 
 
-	def retrive_word(self, word):
+	def retrive_word(self, word, lib):
 		# 找出 DocID 对应的 url
-		manager = documentManager()
-		collection = manager.connect_mongo()
-
+		
 		id_list = []
-		for word in self.word_dictionary[word]:
-			print word[0]
-			data = collection.find_one({"id": word[0]})
-			# url = data["url"]
-			id_list.append(word[0])
+		try:
+			for word in self.indexList[lib][word]:
+				id_list.append(word[0])
+		except KeyError:
+			id_list = []
 		print id_list
 		return id_list   # 文档id列表
 
-	def perform_query(self, query_input):
+	def perform_query(self, query_input, lib, cos):
 		id_list = []
 		output_num = 5 #返回用户的结果个数
 		words = query_input.split(' ')
-		
 		for word in words:
-			self.id_list = self.retrive_word(word)
-			cos = CosineSim()
-			cos.getBestFromDoc(query_input, self.id_list)
-			# score_dict = self.caculate_TFIDF(word)
+			temp = self.retrive_word(word, lib)
+			for id in temp:
+				if id not in self.id_list:
+					self.id_list.append(id)
+		top5 = cos.getBestFromDoc(query_input, self.id_list, lib)
+		results=[]
+		if len(top5) == 0:
+			return results
+		# score_dict = self.caculate_TFIDF(word)
+		else:
 
+			count = 0
+			collection = self.manager.connect_mongo_sof(lib)
+			
+			for result in top5:
+				if count == 5:
+					break
+				temp = collection.find_one({"id":int(result)})
+				print temp
+				temp_result = {}
+				temp_result["title"] = temp["title"]
+				temp_result["url"] = temp["url"]
+				temp_result["code"] = temp["code"]
+				results.append(temp_result)
+				count = count + 1
+			
+			return results
 		# 	count = 0
 		# 	for pair in score_dict:
 		# 		if count == output_num:
@@ -128,5 +171,8 @@ class indexSearcher(object):
 				
 if __name__ == '__main__':
 	searcher = indexSearcher()
-	searcher.perform_query("ApiOperation")
+	searcher.load_index_test(["hibernate"])
+	cos = CosineSim()
+	cos.load_vector_test(["hibernate"])
+	searcher.perform_query("annotation","hibernate",cos)
 	# searcher.caculate_BM25("Genson")

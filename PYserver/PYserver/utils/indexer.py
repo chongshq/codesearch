@@ -4,6 +4,7 @@ import string
 import pickle
 from documentManager import documentManager
 from cluster import CosineSim
+from settings import *
 
 class Indexer(object):
 	
@@ -25,7 +26,7 @@ class Indexer(object):
 			else:
 				result_dict[word] += 1
 
-		file_out = open('text/sof-result','a')
+		file_out = open('text/sof-result-'+ LIB_NAME,'a')
 	        for key in result_dict.keys():
 	    	    file_out.write(key + '\t' + str(docID) + '\t' + str(result_dict[key]) + '\n')
 	        file_out.close()
@@ -37,9 +38,9 @@ class Indexer(object):
 		for loop in collection.find({}):
 			question = loop["question"]
 			answer = loop["answer"]
-			code_clean = loop["code"]   # should be code_clean
+			code_clean = loop["code_clean"]   # should be code_clean
 			_id = loop["id"]
-			print _id
+			# print _id
 			#print _id.str
 			# code = loop["code"]
 			self.count_words(code_clean, _id)
@@ -47,7 +48,7 @@ class Indexer(object):
 	# 对统计结果 <word, DocID, Freq> 排序
 	def sort_index(self):
 		index_list = []
-		file_in = open('text/sof-result','r')
+		file_in = open('text/sof-result-'+ LIB_NAME,'r')
 		line = file_in.readline()
 		while line:
 			index_list.append(line)
@@ -55,7 +56,7 @@ class Indexer(object):
 		file_in.close
 
 		index_list.sort()
-		file_out = open('text/sof-result-sorted','a')
+		file_out = open('text/sof-result-sorted-'+ LIB_NAME,'a')
 		for index in index_list:
 			file_out.write(index)
 		file_out.close()
@@ -64,7 +65,7 @@ class Indexer(object):
 	def make_dictionnary(self):
 		word_dictionary = {}
 
-		file_in = open('text/sof-result-sorted','r')
+		file_in = open('text/sof-result-sorted-'+ LIB_NAME,'r')
 		line = file_in.readline()
 		while line:
 			items = line[:-1].split('\t')
@@ -95,13 +96,13 @@ class Indexer(object):
 		# 		break
 
 		# 将 Dic 对象持久化
-		mydb = open('sof-postings', 'w')
+		mydb = open('index/sof-postings-'+ LIB_NAME, 'w')
 		pickle.dump(word_dictionary, mydb)
 		
 
 if __name__ == '__main__':
 	indexer = Indexer()
-	file_in = open('text/text-1','r')
+	# file_in = open('text/text-1','r')
 	# indexer.count_words(file_in, 10000)
 	indexer.process_all_documents()
 	indexer.sort_index()

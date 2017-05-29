@@ -42,12 +42,26 @@ class CosineSim(object):
         self.best_i = None
         self.posts = []
         self.dictionary = []
-        filename = 'vocabulary_'+LIB_NAME+'.json'
-        if os.path.exists(filename):
-            self.vectorizer = pickle.load(open(filename, mode = 'rb'))
-            self.X = pickle.load(open("vector_"+LIB_NAME+".dat","r"))   #源数据向量化 X,元素a[i][j]表示j词在i类文本中的tf-idf权重
-            self.num_samples, self.num_features = self.X.shape       # 样本数和特征数
+        self.libList = ["jsoup"]  #mock
+        self.vectorList = {}
+        self.XList = {}
         #self.testVector()
+
+    def load_vector_cache(self, liblist):
+        for lib in liblist:
+            self.vectorizer = pickle.load(open('PYserver/utils/index/vocabulary_'+lib+'.json', mode = 'rb'))
+            self.X = pickle.load(open("PYserver/utils/index/vector_"+lib+".dat","r"))   #源数据向量化 X,元素a[i][j]表示j词在i类文本中的tf-idf权重
+            self.num_samples, self.num_features = self.X.shape       # 样本数和特征数
+            self.vectorList[lib] = self.vectorizer
+            self.XList[lib] = self.X
+
+    def load_vector_test(self, liblist):
+        for lib in liblist:
+            self.vectorizer = pickle.load(open('index/vocabulary_'+lib+'.json', mode = 'rb'))
+            self.X = pickle.load(open("index/vector_"+lib+".dat","r"))   #源数据向量化 X,元素a[i][j]表示j词在i类文本中的tf-idf权重
+            self.num_samples, self.num_features = self.X.shape       # 样本数和特征数
+            self.vectorList[lib] = self.vectorizer
+            self.XList[lib] = self.X
 
     # 处理所有 MongoDB 中的文档，统计结果 得到 向量化的且经过文本处理的 二维数组 到MongoDB 的分析库  中
     def process_all_documents(self):
@@ -62,7 +76,7 @@ class CosineSim(object):
             answer = loop["answer"]
             _id = loop["_id"]
             content = question + "\n"+ answer
-            # collection.update({"_id":_id},{"$set" : {"id" : i}})
+            collection.update({"_id":_id},{"$set" : {"id" : i}})
             # if(i<10):
             self.dictionary.append(_id)
             self.posts.append(content)
@@ -79,10 +93,10 @@ class CosineSim(object):
     #     return self.test_raw
 
     def vectorize(self, vectorizer):
-        filename = 'vocabulary_'+LIB_NAME+'.json'
+        filename = 'index/vocabulary_'+LIB_NAME+'.json'
         if os.path.exists(filename):
             vectorizer = pickle.load(open(filename, mode = 'rb'))
-            self.X = pickle.load(open("vector_"+LIB_NAME+".dat","r"))   #源数据向量化 X,元素a[i][j]表示j词在i类文本中的tf-idf权重
+            self.X = pickle.load(open("index/vector_"+LIB_NAME+".dat","r"))   #源数据向量化 X,元素a[i][j]表示j词在i类文本中的tf-idf权重
             self.num_samples, self.num_features = self.X.shape       # 样本数和特征数
         else:
 
@@ -96,15 +110,13 @@ class CosineSim(object):
             weight = self.X.toarray()
             word_dictionary = vectorizer.get_feature_names()   # 文本空间中的字典
             for i in range(len(weight)):#打印每类文本的tf-idf词语权重，第一个for遍历所有文本，第二个for便利某一类文本下的词语权重
-                print u"-------第",i,u"个帖子的词语tf-idf权重------"
+                # print u"-------第",i,u"个帖子的词语tf-idf权重------"
                 for j in range(len(word_dictionary)):
                     # print word_dictionary[j],weight[i][j]   # 权重矩阵的行即为字典的单词id
                     continue
-            # collection = self.manager.connect_analyze()
-            # collection.insert({"libname": LIB_NAME,"vector":Binary(pickle.dumps(self.X.toarray(), protocol=2))})
             print "==== vetorization complete  in "+str(end - start)+"seconds ====="
             pickle.dump(vectorizer, open(filename, mode = 'wb'))
-            pickle.dump(self.X, open("vector_"+LIB_NAME+".dat","w"))
+            pickle.dump(self.X, open("index/vector_"+LIB_NAME+".dat","w"))
         return vectorizer
 
     def dist_norm(self, v1, v2):  # 词频向量的欧式距离 向量归一化
@@ -143,23 +155,36 @@ class CosineSim(object):
         print "best  in ",str(end - start),"seconds ====>", self.best_i
             #, "\n",self.posts[self.best_i]
 
-    def getBestFromDoc(self, input_search, id_list):
-        input_search_vec = self.vectorizer.transform([input_search])
+    def getBestFromDoc(self, input_search, id_list, lib):
+        input_search_vec = self.vectorList[lib].transform([input_search])
         start = time.clock()
         print " ==== fetching best related ... ===="
+        tuple_list = []
         for i in id_list:
             # post = self.posts[i]    # 循环访问源数据向量
             # if post == input_search:
             #     continue
-            print "calculating:", i
-            post_vec = self.X.getrow(int(i))
+            # print "calculating:", i
+            post_vec = self.XList[lib].getrow(int(i))
             d = self.cos(post_vec.toarray()[0], input_search_vec.toarray()[0])
-            print i, d
+            t = (i, d)
+            tuple_list.append(t)
             if d>self.best_dist:
                 self.best_dist = d
                 self.best_i = i
+        sorted_list = sorted(tuple_list,key=lambda x: x[1], reverse = True)
         end = time.clock()
         print "best  in ",str(end - start),"seconds ====>", self.best_i
+        result_doc_id = []
+        count = 0
+        for item in sorted_list:
+            if count == 5:
+                break
+            result_doc_id.append(item[0])
+            count = count+1
+        print sorted_list
+        print result_doc_id
+        return result_doc_id
             #, "\n",self.posts[self.best_i]
     
     def tfidf(self,term,doc,docset):

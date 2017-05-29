@@ -62,6 +62,7 @@ class TopicModel(object):
             #     break
             question = loop["name"]
             self.libList.append(question)
+        return self.libList
 
     # 处理所有 MongoDB 中的文档，统计结果 得到 向量化的且经过文本处理的 二维数组 到MongoDB 的分析库  中
     def process_all_documents(self, lib):
@@ -105,6 +106,7 @@ class TopicModel(object):
     def build_topicModel(self, corpus, dictionary):
         print "==== generating topic model ... ===="
         lsi = models.LdaModel(corpus = corpus, id2word=dictionary, num_topics = 225
+                    , alpha=(1.0/len(corpus))
                     # ,update_every = 1,chunksize = 10000
                     )
         
@@ -133,7 +135,7 @@ class TopicModel(object):
         self.get_libs()
         processor = Processor()
         for lib in self.libList:
-            filename = lib+'.pkl'
+            filename = "models/"+lib+'.pkl'
             if os.path.exists(filename):
                 print lib, "model already exists"
                 # self.load_data(lib)
@@ -153,22 +155,22 @@ class TopicModel(object):
         
 
     def load_data(self,lib):
-        self.lsi = models.LdaModel.load("PYserver/utils/"+lib+'.pkl')
-        self.index = pickle.load(open("PYserver/utils/"+lib+"_index.dat","r"))
-        self.dictionary = pickle.load(open("PYserver/utils/"+lib+"_dictionary.dat","r"))
+        self.lsi = models.LdaModel.load("models/"+lib+'.pkl')
+        self.index = pickle.load(open("models/"+lib+"_index.dat","r"))
+        self.dictionary = pickle.load(open("models/"+lib+"_dictionary.dat","r"))
 
-    def load_to_cache(self):
-        self.get_libs()
-        for lib in self.libList:
+    def load_to_cache(self, liblist):
+        
+        for lib in liblist:
 
-            self.ldaList[lib] = models.LdaModel.load("PYserver/utils/"+lib+'.pkl')
-            self.indexList[lib] = pickle.load(open("PYserver/utils/"+lib+"_index.dat","r"))
-            self.dictionaryList[lib] = pickle.load(open("PYserver/utils/"+lib+"_dictionary.dat","r"))
+            self.ldaList[lib] = models.LdaModel.load("PYserver/utils/models/"+lib+'.pkl')
+            self.indexList[lib] = pickle.load(open("PYserver/utils/models/"+lib+"_index.dat","r"))
+            self.dictionaryList[lib] = pickle.load(open("PYserver/utils/models/"+lib+"_dictionary.dat","r"))
 
     def dump_data(self,lib):
-        self.lsi.save("PYserver/utils/"+lib+'.pkl')
-        pickle.dump(self.index, open("PYserver/utils/"+lib+"_index.dat","w"))
-        pickle.dump(self.dictionary, open("PYserver/utils/"+lib+"_dictionary.dat","w"))
+        self.lsi.save(lib+'.pkl')
+        pickle.dump(self.index, open("models/"+lib+"_index.dat","w"))
+        pickle.dump(self.dictionary, open("models/"+lib+"_dictionary.dat","w"))
         print "all data dumped"
         
     def build_index(self):
@@ -201,10 +203,10 @@ class TopicModel(object):
         collection = self.manager.connect_mongo_sof(lib)
         results=[]
         for result in sort_sims:
-            if count == 5:
+            if count == 10:
                 break
             print "similar article: ===>", sort_sims[count]
-            temp = collection.find_one({"id":sort_sims[count][0]})
+            temp = collection.find_one({"id":int(result[0])})
             temp_result = {}
             temp_result["title"] = temp["title"]
             temp_result["url"] = temp["url"]
@@ -235,10 +237,10 @@ class TopicModel(object):
         collection = self.manager.connect_mongo_sof(lib)
         results=[]
         for result in sort_sims:
-            if count == 5:
+            if count == 10:
                 break
             print "similar article: ===>", sort_sims[count]
-            temp = collection.find_one({"id":sort_sims[count][0]})
+            temp = collection.find_one({"id":int(result[0])})
             temp_result = {}
             temp_result["title"] = temp["title"]
             temp_result["url"] = temp["url"]
@@ -255,8 +257,8 @@ class TopicModel(object):
 if __name__ == '__main__':
     topic = TopicModel()
     
-    # topic.train(environment)
-    topic.show_topics(LIB_NAME)
+    topic.train(environment)
+    # topic.show_topics(LIB_NAME)
     # query = "silver trunk"
     # query = "association"
     
