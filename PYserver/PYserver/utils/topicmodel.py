@@ -3,7 +3,6 @@
 import numpy as np
 import string
 import pickle
-import scipy as sp
 import sys
 import math
 import time
