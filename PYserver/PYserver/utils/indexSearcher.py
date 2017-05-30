@@ -125,25 +125,28 @@ class indexSearcher(object):
 				id_list.append(word[0])
 		except KeyError:
 			id_list = []
-		print id_list
+		# print id_list
 		return id_list   # 文档id列表
 
 	def perform_query(self, query_input, lib, cos):
 		id_list = []
 		output_num = 5 #返回用户的结果个数
 		words = query_input.split(' ')
+		print "retrive word"
 		for word in words:
 			temp = self.retrive_word(word, lib)
 			for id in temp:
 				if id not in self.id_list:
 					self.id_list.append(id)
+		print "fetch top5"
 		top5 = cos.getBestFromDoc(query_input, self.id_list, lib)
+		print "get top5 results"
 		results=[]
 		if len(top5) == 0:
 			return results
 		# score_dict = self.caculate_TFIDF(word)
 		else:
-
+			print "collecting data"
 			count = 0
 			collection = self.manager.connect_mongo_sof(lib)
 			
@@ -151,14 +154,14 @@ class indexSearcher(object):
 				if count == 5:
 					break
 				temp = collection.find_one({"id":int(result)})
-				print temp
+				# print temp
 				temp_result = {}
 				temp_result["title"] = temp["title"]
 				temp_result["url"] = temp["url"]
 				temp_result["code"] = temp["code"]
 				results.append(temp_result)
 				count = count + 1
-			
+			print "return data"
 			return results
 		# 	count = 0
 		# 	for pair in score_dict:

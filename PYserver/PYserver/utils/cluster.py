@@ -182,7 +182,7 @@ class CosineSim(object):
                 break
             result_doc_id.append(item[0])
             count = count+1
-        print sorted_list
+        # print sorted_list
         print result_doc_id
         return result_doc_id
             #, "\n",self.posts[self.best_i]

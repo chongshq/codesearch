@@ -10,10 +10,10 @@ import json
 
 indexSearcher = indexSearcher()
 liblist = indexSearcher.get_libs()
-indexSearcher.load_index_cache(liblist)
+# indexSearcher.load_index_cache(liblist)
 print "index loaded"
 cos = CosineSim()
-cos.load_vector_cache(liblist)
+# cos.load_vector_cache(liblist)
 print "vector loaded"
 print settings.BASE_DIR
 
@@ -29,6 +29,9 @@ def search(request):
     response_data = {}  
     if 'q' in request.GET:
         message = '你搜索的内容为: ' + request.GET['q']
+        print "start searching"
+        indexSearcher.load_index_cache([request.GET['lib']])
+        cos.load_vector_cache([request.GET['lib']])
         result_list = indexSearcher.perform_query(request.GET['q'],request.GET['lib'],cos)
         response_data['sof'] = result_list 
     else:
