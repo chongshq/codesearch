@@ -8,7 +8,7 @@ import json
 
 
 model = TopicModel()
-model.load_to_cache(model.get_libs())
+# model.load_to_cache(model.get_libs())
 print settings.BASE_DIR
 
  
@@ -23,6 +23,8 @@ def search(request):
     response_data = {}  
     if 'q' in request.GET:
         message = '你搜索的内容为: ' + request.GET['q']
+
+        model.load_to_cache([request.GET['lib']])
         result_list = model.find_cache(request.GET['q'],request.GET['lib'])
         response_data['result'] = result_list 
     else:
