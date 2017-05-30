@@ -25,7 +25,8 @@ SECRET_KEY = 'p=e!0f#w!+q9^#3j(idcuq5)8d&_ctua=9u!c8o7@4$m3xy(hr'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*.qiancs.cn']
+
 
 
 # Application definition
