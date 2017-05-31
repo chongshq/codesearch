@@ -160,18 +160,23 @@ class CosineSim(object):
         start = time.clock()
         print " ==== fetching best related ... ===="
         tuple_list = []
+        print id_list
         for i in id_list:
             # post = self.posts[i]    # 循环访问源数据向量
             # if post == input_search:
             #     continue
             # print "calculating:", i
-            post_vec = self.XList[lib].getrow(int(i))
-            d = self.cos(post_vec.toarray()[0], input_search_vec.toarray()[0])
-            t = (i, d)
-            tuple_list.append(t)
-            if d>self.best_dist:
-                self.best_dist = d
-                self.best_i = i
+            try:
+                post_vec = self.XList[lib].getrow(int(i))
+                d = self.cos(post_vec.toarray()[0], input_search_vec.toarray()[0])
+                t = (i, d)
+                tuple_list.append(t)
+                if d>self.best_dist:
+                    self.best_dist = d
+                    self.best_i = i
+            except IndexError:
+                print i
+        print "sorting result"
         sorted_list = sorted(tuple_list,key=lambda x: x[1], reverse = True)
         end = time.clock()
         print "best  in ",str(end - start),"seconds ====>", self.best_i
